@@ -3,7 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "d:/CP-DSA/AZ Course/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -11,10 +11,19 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.22621.0",
-            "compilerPath": "/usr/bin/gcc-11",
+            "compilerPath": "C:/x86_64-13.2.0-release-posix-seh-msvcrt-rt_v11-rev0/mingw64/bin/gcc.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-gcc-x86"
+            "intelliSenseMode": "windows-gcc-x86",
+            "compilerPathInCppPropertiesJson": "/usr/bin/gcc-11",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "d:/CP-DSA/AZ Course/**",
+                    "${workspaceFolder}"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         },
         {
             "name": "Linux",
