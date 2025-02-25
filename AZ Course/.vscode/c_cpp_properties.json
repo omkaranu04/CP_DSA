@@ -28,13 +28,22 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                "/media/omkar/New Volume/CP-DSA/AZ Course/**"
             ],
             "defines": [],
             "cStandard": "c23",
             "cppStandard": "c++23",
-            "intelliSenseMode": "linux-gcc-x86",
-            "compilerPath": "/usr/bin/g++-11"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "compilerPathInCppPropertiesJson": "/usr/bin/gcc",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": [
+                    "/media/omkar/New Volume/CP-DSA/AZ Course/**",
+                    "/media/omkar/New Volume/CP-DSA/AZ Course"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4
