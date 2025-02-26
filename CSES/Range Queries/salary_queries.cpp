@@ -53,5 +53,30 @@ int main(int argc, char const *argv[])
     segTree.resize(4 * n + 1);
     for (ll i = 0; i < n; i++)
         cin >> p[i];
+    while (q--)
+    {
+        char type;
+        cin >> type;
+        if (type == '!')
+        {
+            ll k, x;
+            cin >> k >> x;
+            update(1, 0, n - 1, k - 1, p[k - 1], x);
+            p[k - 1] = x;
+        }
+        else
+        {
+            ll a, b;
+            cin >> a >> b;
+            auto it = segTree[1].ms.lower_bound(a);
+            ll ans = 0;
+            while (it != segTree[1].ms.end() && *it <= b)
+            {
+                ans++;
+                it++;
+            }
+            cout << ans << endl;
+        }
+    }
     return 0;
 }
