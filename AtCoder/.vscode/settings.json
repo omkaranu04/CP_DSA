@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "iostream": "cpp",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "ostream": "cpp"
     }
 }
