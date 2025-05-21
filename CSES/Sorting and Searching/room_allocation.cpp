@@ -1,10 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-bool cmp(pair<ll, ll> a, pair<ll, ll> b)
-{
-    return a.second < b.second;
-}
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
@@ -12,16 +8,35 @@ int main(int argc, char const *argv[])
     cout.tie(NULL);
     ll n;
     cin >> n;
-    vector<pair<ll, ll>> a(n);
+    vector<vector<ll>> a(n, vector<ll>(3));
     for (ll i = 0; i < n; i++)
     {
-        cin >> a[i].first >> a[i].second;
+        cin >> a[i][0] >> a[i][1];
+        a[i][2] = i;
     }
-    sort(a.begin(), a.end(), cmp);
-    for (auto i : a)
+    sort(a.begin(), a.end());
+    priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>> rooms;
+    ll cnt = 0;
+    vector<ll> ans(n);
+    for (ll i = 0; i < n; i++)
     {
-        cout << i.first << " " << i.second << endl;
+        ll arr = a[i][0], dept = a[i][1], idx = a[i][2];
+        if (rooms.empty() || rooms.top().first >= arr)
+        {
+            cnt++;
+            rooms.push({dept, cnt});
+            ans[idx] = cnt;
+        }
+        else
+        {
+            ll vac = rooms.top().second;
+            rooms.pop();
+            rooms.push({dept, vac});
+            ans[idx] = vac;
+        }
     }
-    
+    cout << cnt << endl;
+    for (auto x : ans)
+        cout << x << " ";
     return 0;
 }
