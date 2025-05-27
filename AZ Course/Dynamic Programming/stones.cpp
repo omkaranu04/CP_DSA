@@ -1,22 +1,26 @@
 #include <bits/stdc++.h>
 using namespace std;
+#define ll long long int
 int n, k;
-vector<int> a, dp;
-int rec(int rem_stones)
+ll a[110], dp[100100];
+ll rec(ll x)
 {
-    if (rem_stones == 0)
-        return dp[rem_stones] = 0;
+    if (x == 0)
+        return 0;
+    if (dp[x] != -1)
+        return dp[x];
 
-    if (dp[rem_stones] != -1)
-        return dp[rem_stones];
-
-    for (auto i : a)
+    ll ans = 0;
+    for (ll i = 0; i < n; i++)
     {
-        if (rem_stones - i >= 0 && rec(rem_stones - i) == 0)
-            return dp[rem_stones] = 1;
+        if (x - a[i] >= 0 && rec(x - a[i]) == 0)
+        {
+            ans = 1;
+            break;
+        }
     }
 
-    return dp[rem_stones] = 0;
+    return dp[x] = ans;
 }
 int main(int argc, char const *argv[])
 {
@@ -24,11 +28,8 @@ int main(int argc, char const *argv[])
     cin.tie(NULL);
     cout.tie(NULL);
     cin >> n >> k;
-    a.resize(n);
-    dp.resize(k + 1, -1);
     for (int i = 0; i < n; i++)
         cin >> a[i];
-    // RECURSION FAIL ON MANY TEST CASES
     // cout << (rec(k) ? "First" : "Second") << endl;
 
     // iter solution

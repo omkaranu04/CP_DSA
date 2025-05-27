@@ -1,94 +1,122 @@
-#include <bits/stdc++.h> // Warnsdorffs Algorithm
-#pragma GCC optimize("Ofast")
-#pragma GCC target("avx,avx2,fma")
+/*
+    Warnsdorff's Heuristic
+    1. We can start from any initial position of the knight on the board
+    2. We always move to an adjacent, unvisited square with minimal
+        degree (minimum number of unvisited adjacent).
+*/
+#include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
 #define endl "\n"
-ll sx, sy;
-ll dx[] = {2, 1, -1, -2, -2, -1, 1, 2};
-ll dy[] = {1, 2, 2, 1, -1, -2, -2, -1};
-vector<pair<ll, ll>> path;
-vector<vector<ll>> vis(8, vector<ll>(8, 0));
+const ll mod = 1e9 + 7;
+const ll N = 8;
+ll startx, starty;
+ll pos[N][N], deg[N][N], vis[N][N];
+ll dx[N] = {-2, -1, 1, 2, 2, 1, -1, -2};
+ll dy[N] = {1, 2, 2, 1, -1, -2, -2, -1};
+
 bool check(ll x, ll y)
 {
-    if (x >= 0 && x < 8 && y >= 0 && y < 8)
-        return true;
-    return false;
+    return x >= 0 && x < N && y >= 0 && y < N;
 }
-ll getDegree(ll x, ll y)
+
+void init()
 {
-    ll cnt = 0;
-    for (ll i = 0; i < 8; i++)
+    for (ll x = 0; x < N; x++)
     {
-        ll nx = x + dx[i];
-        ll ny = y + dy[i];
-        if (check(nx, ny) && !vis[nx][ny])
-            cnt++;
-    }
-    return cnt;
-}
-bool take_move(ll x, ll y)
-{
-    ll min_deg_x = -1, min_deg_y = -1, min_deg = 9;
-    for (ll i = 0; i < 8; i++)
-    {
-        ll nx = x + dx[i];
-        ll ny = y + dy[i];
-        if (check(nx, ny) && !vis[nx][ny])
+        for (ll y = 0; y < N; y++)
         {
-            ll deg = getDegree(nx, ny);
-            if (deg < min_deg)
+            deg[x][y] = 0;
+            for (ll i = 0; i < N; i++)
             {
-                min_deg = deg;
-                min_deg_x = nx;
-                min_deg_y = ny;
+                ll nx = x + dx[i], ny = y + dy[i];
+                if (check(nx, ny))
+                    deg[x][y]++;
             }
         }
     }
-    if (min_deg_x == -1 && min_deg_y == -1)
-        return false;
-    vis[min_deg_x][min_deg_y] = 1;
-    path.push_back({min_deg_x, min_deg_y});
-    return true;
 }
-bool find_tour()
+void mark(ll id, ll x, ll y)
 {
-    path.push_back({sx, sy});
-    vis[sx][sy] = 1;
-    for (ll i = 0; i < 63; i++)
+    pos[x][y] = id;
+    vis[x][y] = 1;
+    for (ll i = 0; i < N; i++)
     {
-        if (!take_move(path.back().first, path.back().second))
-            return false;
+        ll nx = x + dx[i], ny = y + dy[i];
+        if (check(nx, ny) && !vis[nx][ny])
+            deg[nx][ny]--;
     }
-    return true;
 }
+void unmark(ll x, ll y)
+{
+    pos[x][y] = -1;
+    vis[x][y] = 0;
+    for (ll i = 0; i < N; i++)
+    {
+        ll nx = x + dx[i], ny = y + dy[i];
+        if (check(nx, ny) && !vis[nx][ny])
+            deg[nx][ny]++;
+    }
+}
+bool check(ll x, ll y, ll cnt)
+{
+    mark(cnt, x, y);
+
+    if (cnt >= N * N)
+        return true;
+
+    vector<pair<ll, pair<ll, ll>>> nextmoves;
+
+    for (ll i = 0; i < N; i++)
+    {
+        ll nx = x + dx[i], ny = y + dy[i];
+        if (check(nx, ny) && !vis[nx][ny])
+            nextmoves.push_back({deg[nx][ny], {nx, ny}});
+    }
+
+    sort(nextmoves.begin(), nextmoves.end());
+
+    for (auto move : nextmoves)
+    {
+        ll nx = move.second.first, ny = move.second.second;
+        if (check(nx, ny, cnt + 1))
+            return true;
+    }
+
+    unmark(x, y);
+    return false;
+}
+
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    cin >> sx >> sy;
-    // swap(sx, sy);
-    sx--, sy--;
-    vector<vector<ll>> ans(8, vector<ll>(8, 0));
-    if (find_tour())
+
+    cin >> startx >> starty;
+    startx--, starty--;
+    swap(startx, starty);
+
+    memset(pos, -1, sizeof(pos));
+    memset(vis, 0, sizeof(vis));
+    memset(deg, 0, sizeof(deg));
+
+    init();
+
+    if (check(startx, starty, 1))
     {
-        for (ll i = 0; i < 64; i++)
+        for (ll i = 0; i < N; i++)
         {
-            ans[path[i].second][path[i].first] = i + 1;
-        }
-        for (ll i = 0; i < 8; i++)
-        {
-            for (ll j = 0; j < 8; j++)
+            for (ll j = 0; j < N; j++)
             {
-                cout << ans[i][j] << " ";
+                cout << pos[i][j] << " ";
             }
             cout << endl;
         }
     }
     else
     {
-        cout << "IMPOSSIBLE" << endl;
+        cout << "IMPOSSIBLE\n";
     }
     return 0;
 }
