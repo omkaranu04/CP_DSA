@@ -2,57 +2,52 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
-struct node
-{
-    ll sum;
-};
+const ll mod = 1e9 + 7;
 ll n, q;
-vector<ll> x, lastseen;
-vector<pair<ll, ll>> f_lastseen;
-vector<node> tree;
-node merge(node a, node b)
+vector<ll> x, last_seen;
+vector<pair<ll, ll>> qs, llseen;
+vector<pair<pair<ll, ll>, pair<ll, ll>>> offqs; // val, idx, l, r
+struct SegTree
 {
-    node temp;
-    temp.sum = a.sum + b.sum;
-    return temp;
-}
-void build(ll idx, ll l, ll r)
-{
-    if (l == r)
+    ll n;
+    vector<ll> a, st;
+    SegTree(ll _n, vector<ll> &_a) : n(_n), a(_a), st(4 * _n + 4) {}
+    void build(ll id, ll l, ll r)
     {
-        tree[idx].sum = 0;
-        return;
+        if (l == r)
+        {
+            st[id] = a[l];
+            return;
+        }
+        ll mid = (l + r) / 2;
+        build(2 * id, l, mid);
+        build(2 * id + 1, mid + 1, r);
+        st[id] = st[2 * id] + st[2 * id + 1];
     }
-    ll mid = (l + r) / 2;
-    build(2 * idx, l, mid);
-    build(2 * idx + 1, mid + 1, r);
-    tree[idx] = merge(tree[2 * idx], tree[2 * idx + 1]);
-    return;
-}
-void update(ll idx, ll l, ll r, ll pos, ll val)
-{
-    if (pos < l || pos > r)
-        return;
-    if (l == r)
+    void update(ll id, ll l, ll r, ll pos, ll val)
     {
-        tree[idx].sum = val;
-        return;
+        if (l == r)
+        {
+            st[id] = val;
+            return;
+        }
+        ll mid = (l + r) / 2;
+        if (pos <= mid)
+            update(2 * id, l, mid, pos, val);
+        else
+            update(2 * id + 1, mid + 1, r, pos, val);
+        st[id] = st[2 * id] + st[2 * id + 1];
     }
-    ll mid = (l + r) / 2;
-    update(2 * idx, l, mid, pos, val);
-    update(2 * idx + 1, mid + 1, r, pos, val);
-    tree[idx] = merge(tree[2 * idx], tree[2 * idx + 1]);
-    return;
-}
-ll query(ll idx, ll l, ll r, ll ql, ll qr)
-{
-    if (l > qr || r < ql)
-        return 0;
-    if (l >= ql && r <= qr)
-        return tree[idx].sum;
-    ll mid = (l + r) / 2;
-    return query(2 * idx, l, mid, ql, qr) + query(2 * idx + 1, mid + 1, r, ql, qr);
-}
+    ll query(ll id, ll l, ll r, ll ql, ll qr)
+    {
+        if (qr < l || ql > r)
+            return 0;
+        if (l >= ql && r <= qr)
+            return st[id];
+        ll mid = (l + r) / 2;
+        return query(2 * id, l, mid, ql, qr) + query(2 * id + 1, mid + 1, r, ql, qr);
+    }
+};
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
@@ -60,56 +55,54 @@ int main(int argc, char const *argv[])
     cout.tie(NULL);
     cin >> n >> q;
     x.resize(n);
-    lastseen.resize(n, -1);
-    tree.resize(4 * n + 1);
     for (ll i = 0; i < n; i++)
         cin >> x[i];
-    map<ll, ll> mp;     
-    for (ll i = 0; i < n; i++)
-    {
-        if (mp.find(x[i]) != mp.end())
-            lastseen[i] = mp[x[i]];
-        mp[x[i]] = i;
-    }
-    for (ll i = 0; i < n; i++)
-    {
-        f_lastseen.push_back({lastseen[i], i});
-    }
-    sort(f_lastseen.begin(), f_lastseen.end());
-
-    // make the queries offline
-    vector<pair<pair<ll, ll>, pair<ll, ll>>> queries; // k, query_idx, a, b
-    vector<ll> ans(q);
     for (ll i = 0; i < q; i++)
     {
         ll a, b;
         cin >> a >> b;
-        a--;
-        b--;
-        queries.push_back({{a - 1, i}, {a, b}});
+        a--, b--;
+        qs.push_back({a, b});
     }
-    sort(queries.begin(), queries.end());
 
-    // build function
-    build(1, 0, n - 1);
-
-    ll pos = 0;
-    for (auto v : queries)
+    last_seen.resize(n);
+    map<ll, ll> mp;
+    for (ll i = 0; i < n; i++)
     {
-        while (pos < f_lastseen.size() && f_lastseen[pos].first <= v.first.first)
+        if (mp.find(x[i]) == mp.end())
+            last_seen[i] = -1;
+        else
+            last_seen[i] = mp[x[i]];
+        mp[x[i]] = i;
+    }
+
+    ll tmp = 0;
+    for (auto &[a, b] : qs)
+    {
+        offqs.push_back({{a - 1, tmp++}, {a, b}});
+    }
+    sort(offqs.begin(), offqs.end());
+
+    for (ll i = 0; i < n; i++)
+    {
+        llseen.push_back({last_seen[i], i});
+    }
+    sort(llseen.begin(), llseen.end());
+
+    vector<ll> a(n, 0), ans(q);
+    SegTree st(n, a);
+    ll j = 0;
+    for (ll i = 0; i < q; i++)
+    {
+        auto &x = offqs[i];
+        while (j < n && llseen[j].first <= x.first.first)
         {
-            // update function
-            update(1, 0, n - 1, f_lastseen[pos].second, 1);
-            pos++;
+            st.update(1, 0, n - 1, llseen[j].second, 1LL);
+            j++;
         }
-        ans[v.first.second] = query(1, 0, n - 1, v.second.first, v.second.second); // query function
+        ans[x.first.second] = st.query(1, 0, n - 1, x.second.first, x.second.second);
     }
-
-    // final printing
-    for (auto x : ans)
-    {
-        cout << x << endl;
-    }
-
+    for (ll i = 0; i < q; i++)
+        cout << ans[i] << endl;
     return 0;
 }

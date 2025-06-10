@@ -1,132 +1,141 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-#define endl "\n"
-ll n, q;
-vector<ll> t;
-struct node
+#define endl '\n'
+
+typedef struct node
 {
+    ll sum, lazy_set, lazy_add;
     ll l, r;
-    ll sum;
-    ll lazy_set; // set each element in the range to this value
-    ll lazy_sum; // add this value to each element in the range
-    node(ll l = 0, ll r = 0, ll sum = 0, ll lazy_set = 0, ll lazy_sum = 0) : l(l), r(r), sum(sum), lazy_set(lazy_set), lazy_sum(lazy_sum) {}
+    node(ll _l = 0, ll _r = 0, ll _sum = 0, ll _lazy_add = 0, ll _lazy_set = 0) : sum(_sum), lazy_set(_lazy_set), lazy_add(_lazy_add), l(_l), r(_r) {}
+} Node;
+struct SegTree
+{
+    ll n;
+    vector<ll> a;
+    vector<Node> segtree;
+    SegTree(ll _n, vector<ll> &_a) : n(_n), a(_a), segtree(4 * _n + 4) {}
+
+    void build(ll id, ll l, ll r)
+    {
+        segtree[id].l = l;
+        segtree[id].r = r;
+        if (l == r)
+        {
+            segtree[id].sum = a[l];
+            return;
+        }
+        ll mid = (l + r) / 2;
+        build(2 * id, l, mid);
+        build(2 * id + 1, mid + 1, r);
+        segtree[id].sum = segtree[2 * id].sum + segtree[2 * id + 1].sum;
+    }
+
+    void pushdown(ll id)
+    {
+        ll l = segtree[id].l, r = segtree[id].r;
+        if (segtree[id].lazy_set)
+        {
+            segtree[id].sum = (r - l + 1) * 1LL * segtree[id].lazy_set;
+            if (l < r) // non leaf node only
+            {
+                segtree[2 * id].lazy_set = segtree[id].lazy_set;
+                segtree[2 * id].lazy_add = 0;
+                segtree[2 * id + 1].lazy_set = segtree[id].lazy_set;
+                segtree[2 * id + 1].lazy_add = 0;
+            }
+            segtree[id].lazy_set = 0;
+        }
+        if (segtree[id].lazy_add)
+        {
+            segtree[id].sum += (r - l + 1) * 1LL * segtree[id].lazy_add;
+            if (l < r) // non leaf node only
+            {
+                segtree[2 * id].lazy_add += segtree[id].lazy_add;
+                // segtree[2 * id].lazy_set = 0;
+                segtree[2 * id + 1].lazy_add += segtree[id].lazy_add;
+                // segtree[2 * id + 1].lazy_set = 0;
+            }
+            segtree[id].lazy_add = 0;
+        }
+    }
+
+    void update(ll id, ll l, ll r, ll ql, ll qr, ll val, bool to_set)
+    {
+        pushdown(id);
+        if (l > qr || r < ql)
+            return;
+        if (l >= ql && r <= qr)
+        {
+            if (!to_set)
+            {
+                segtree[id].lazy_add += val;
+                // segtree[id].lazy_set = 0;
+            }
+            else
+            {
+                segtree[id].lazy_set = val;
+                segtree[id].lazy_add = 0;
+            }
+            pushdown(id);
+            return;
+        }
+        ll mid = (l + r) / 2;
+        update(2 * id, l, mid, ql, qr, val, to_set);
+        update(2 * id + 1, mid + 1, r, ql, qr, val, to_set);
+        segtree[id].sum = segtree[2 * id].sum + segtree[2 * id + 1].sum;
+    }
+
+    ll query(ll id, ll l, ll r, ll ql, ll qr)
+    {
+        if (qr < l || ql > r)
+            return 0;
+        pushdown(id);
+        if (l >= ql && r <= qr)
+            return segtree[id].sum;
+        ll mid = (l + r) / 2;
+        return query(2 * id, l, mid, ql, qr) + query(2 * id + 1, mid + 1, r, ql, qr);
+    }
 };
-vector<node> segTree;
-void merge(ll id)
-{
-    segTree[id].sum = segTree[2 * id].sum + segTree[2 * id + 1].sum;
-}
-void lazy_push(ll id)
-{
-    if (segTree[id].lazy_set)
-    {
-        segTree[id].sum = (segTree[id].r - segTree[id].l + 1) * segTree[id].lazy_set;
-        if (segTree[id].l < segTree[id].r)
-        {
-            // left child
-            segTree[2 * id].lazy_set = segTree[id].lazy_set;
-            segTree[2 * id].lazy_sum = 0;
-            // right child
-            segTree[2 * id + 1].lazy_set = segTree[id].lazy_set;
-            segTree[2 * id + 1].lazy_sum = 0;
-        }
-        segTree[id].lazy_set = 0;
-    }
-    if (segTree[id].lazy_sum)
-    {
-        segTree[id].sum += (segTree[id].r - segTree[id].l + 1) * segTree[id].lazy_sum;
-        if (segTree[id].l < segTree[id].r)
-        {
-            segTree[2 * id].lazy_sum += segTree[id].lazy_sum;
-            segTree[2 * id + 1].lazy_sum += segTree[id].lazy_sum;
-        }
-        segTree[id].lazy_sum = 0;
-    }
-}
-void build(ll id, ll l, ll r)
-{
-    segTree[id].l = l;
-    segTree[id].r = r;
-    if (l == r)
-    {
-        segTree[id].sum = t[l];
-        return;
-    }
-    ll mid = (l + r) / 2;
-    build(2 * id, l, mid);
-    build(2 * id + 1, mid + 1, r);
-    merge(id);
-}
-void update(ll id, ll l, ll r, ll ql, ll qr, ll val, bool set)
-{
-    lazy_push(id);
-    if (l > qr || r < ql)
-        return;
-    if (l >= ql && r <= qr)
-    {
-        if (set)
-        {
-            segTree[id].lazy_set = val;
-            segTree[id].lazy_sum = 0;
-        }
-        else
-        {
-            segTree[id].lazy_sum += val;
-        }
-        lazy_push(id);
-        return;
-    }
-    ll mid = (l + r) / 2;
-    update(2 * id, l, mid, ql, qr, val, set);
-    update(2 * id + 1, mid + 1, r, ql, qr, val, set);
-    merge(id);
-}
-ll query(ll id, ll l, ll r, ll ql, ll qr)
-{
-    if (l > qr || r < ql)
-        return 0;
-    lazy_push(id);
-    if (l >= ql && r <= qr)
-        return segTree[id].sum;
-    ll mid = (l + r) / 2;
-    return query(2 * id, l, mid, ql, qr) + query(2 * id + 1, mid + 1, r, ql, qr);
-}
+
 int main(int argc, char const *argv[])
 {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+
+    ll n, q;
     cin >> n >> q;
-    t.resize(n);
-    segTree.resize(4 * n + 1);
-    
+    vector<ll> t(n);
     for (ll i = 0; i < n; i++)
         cin >> t[i];
-
-    build(1, 0, n - 1);
+    SegTree st(n, t);
+    st.build(1, 0, n - 1);
 
     while (q--)
     {
-        ll tt;
-        cin >> tt;
-        if (tt == 1)
+        ll t;
+        cin >> t;
+        if (t == 1)
         {
             ll a, b, x;
             cin >> a >> b >> x;
-            update(1, 0, n - 1, a - 1, b - 1, x, false);
+            a--, b--;
+            st.update(1, 0, n - 1, a, b, x, false);
         }
-        else if (tt == 2)
+        else if (t == 2)
         {
             ll a, b, x;
             cin >> a >> b >> x;
-            update(1, 0, n - 1, a - 1, b - 1, x, true);
+            a--, b--;
+            st.update(1, 0, n - 1, a, b, x, true);
         }
         else
         {
             ll a, b;
             cin >> a >> b;
-            cout << query(1, 0, n - 1, a - 1, b - 1) << endl;
+            a--, b--;
+            cout << st.query(1, 0, n - 1, a, b) << endl;
         }
     }
     return 0;
