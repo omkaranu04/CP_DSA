@@ -2,67 +2,60 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
-
-class trieNode
+const ll mod = 1e9 + 7;
+struct Node
 {
-public:
     ll cnt;
-    multiset<string> wend;
-    trieNode *child[26];
-    trieNode()
-    {
-        cnt = 0;
-        wend.clear();
-        for (int i = 0; i < 26; i++)
-            child[i] = NULL;
-    }
+    vector<Node *> ch;
+    Node() : cnt(0LL), ch(26, NULL) {}
 };
-
-void insert(string s, ll start, trieNode *root)
+struct StringTrie
 {
-    trieNode *curr = root;
-    for (int i = start; i < s.length(); i++)
+    Node *root;
+    string gs;
+    StringTrie(const string &_gs) : gs(_gs) { root = new Node; }
+    void insert(string s)
     {
-        ll x = s[i] - 'a';
-        if (curr->child[x] == NULL)
-            curr->child[x] = new trieNode();
-        curr = curr->child[x];
-    }
-}
-
-void Ssearch(ll k, ll &ans, trieNode *root, string &a)
-{
-    for (ll i = 0; i < 26; i++)
-    {
-        if (root->child[i] != NULL)
+        Node *curr = root;
+        for (auto c : s)
         {
-            if (k - (a[i] == '0') >= 0)
+            if (curr->ch[c - 'a'] == NULL)
+                curr->ch[c - 'a'] = new Node;
+            curr = curr->ch[c - 'a'];
+            curr->cnt++;
+        }
+    }
+    void query(ll k, ll &ans, Node *root)
+    {
+        for (ll i = 0; i < 26; i++)
+        {
+            if (root->ch[i] != NULL)
             {
-                ans++;
-                Ssearch(k - (a[i] == '0'), ans, root->child[i], a);
+                if (k - (gs[i] == '0') >= 0)
+                {
+                    ans++;
+                    query(k - (gs[i] == '0'), ans, root->ch[i]);
+                }
             }
         }
     }
-}
-
+};
 int main(int argc, char const *argv[])
 {
-    ios::sync_with_stdio(0);
-    cin.tie(0);
-    cout.tie(0);
-
-    string s, a;
-    cin >> s >> a;
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    string s, gs;
+    cin >> s;
+    cin >> gs;
     ll k;
     cin >> k;
-
-    trieNode *root = new trieNode();
-
-    for (int i = 0; i < s.length(); i++)
-        insert(s, i, root);
-
+    StringTrie trie(gs);
+    ll n = s.length();
+    for (ll i = 0; i < n; i++)
+        trie.insert(s.substr(i, n - i));
     ll ans = 0;
-    Ssearch(k, ans, root, a);
+    trie.query(k, ans, trie.root);
     cout << ans << endl;
     return 0;
 }

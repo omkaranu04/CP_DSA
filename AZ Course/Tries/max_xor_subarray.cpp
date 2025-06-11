@@ -1,116 +1,97 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-
-class trieNode
+#define endl '\n'
+const ll BIT = 31;
+struct Node
 {
-public:
-    ll freq;
-    trieNode *left, *right;
-    trieNode()
+    ll cnt;
+    struct Node *child[2];
+    Node() : cnt(0LL)
     {
-        freq = 0;
-        left = NULL;  // 0
-        right = NULL; // 1
+        child[0] = NULL;
+        child[1] = NULL;
     }
 };
-
-void insert(ll n, trieNode *root)
+struct BitTrie
 {
-    trieNode *curr = root;
-    for (int i = 31; i >= 0; i--)
+    Node *root;
+    BitTrie()
     {
-        ll bit = (1 << i) & n;
-        if (bit)
-        {
-            if (!curr->right)
-                curr->right = new trieNode();
-            curr = curr->right;
-            curr->freq++;
-        }
-        else
-        {
-            if (!curr->left)
-                curr->left = new trieNode();
-            curr = curr->left;
-            curr->freq++;
-        }
+        root = new Node;
     }
-}
-
-void erase(ll n, trieNode *root)
-{
-    trieNode *curr = root;
-    for (int i = 31; i >= 0; i--)
+    void insert(ll x)
     {
-        ll bit = (1 << i) & n;
-        if (bit)
+        Node *curr = root;
+        for (ll i = BIT; i >= 0; i--)
         {
-            curr->right->freq--;
-            curr = curr->right;
+            ll bit = ((x & (1LL << i)) ? 1 : 0);
+            curr->cnt++;
+            if (curr->child[bit] == NULL)
+                curr->child[bit] = new Node;
+            curr = curr->child[bit];
         }
-        else
-        {
-            curr->left->freq--;
-            curr = curr->left;
-        }
+        curr->cnt++;
     }
-}
-
-ll findXOR(ll n, trieNode *root)
-{
-    trieNode *curr = root;
-    ll ans = 0;
-    for (int i = 31; i >= 0; i--)
+    void remove(ll x)
     {
-        ll bit = (1 << i) & n;
-        if (bit)
+        Node *curr = root;
+        for (ll i = BIT; i >= 0; i--)
         {
-            if (curr->left && curr->left->freq > 0)
+            ll bit = ((x & (1LL << i)) ? 1 : 0);
+            curr->cnt--;
+            curr = curr->child[bit];
+        }
+        curr->cnt--;
+    }
+    ll query(ll x)
+    {
+        ll ans = 0;
+        Node *curr = root;
+        for (ll i = BIT; i >= 0; i--)
+        {
+            ll bit = ((x & (1LL << i)) ? 1 : 0);
+            if (curr->child[1 - bit] != NULL && curr->child[1 - bit]->cnt > 0)
             {
-                ans += (1 << i);
-                curr = curr->left;
+                ans = ans | (1LL << i);
+                curr = curr->child[1 - bit];
             }
             else
-                curr = curr->right;
-        }
-        else
-        {
-            if (curr->right && curr->right->freq > 0)
             {
-                ans += (1 << i);
-                curr = curr->right;
+                curr = curr->child[bit];
             }
-            else
-                curr = curr->left;
         }
+        return ans;
     }
-    return ans;
-}
-
-int main(int argc, char const *argv[])
+};
+int main()
 {
     ios::sync_with_stdio(0);
     cin.tie(0);
     cout.tie(0);
+
     ll t;
     cin >> t;
     while (t--)
     {
         ll n;
-        cin>>n;
+        cin >> n;
         vector<ll> a(n);
-        for(ll i=0;i<n;i++) cin>>a[i];
-        trieNode *root = new trieNode();
-        insert(0, root);
-        ll pre = 0, ans = -1;
-        for(ll i=0;i<n;i++)
+        for (ll i = 0; i < n; i++)
+            cin >> a[i];
+
+        BitTrie trie;
+        trie.insert(0LL);
+        ll ans = 0, curr = 0;
+        for (ll i = 0; i < n; i++)
         {
-            pre ^= a[i];
-            ans = max(ans, findXOR(pre, root));
-            insert(pre, root);
+            curr ^= a[i];
+            ans = max(ans, trie.query(curr));
+            trie.insert(curr);
         }
-        cout<<ans<<endl;
+
+        cout << ans << endl;
     }
+
     return 0;
 }

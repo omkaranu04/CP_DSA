@@ -1,119 +1,104 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-#define endl "\n"
-
-class trieNode
+#define endl '\n'
+const ll BIT = 31;
+struct Node
 {
-public:
-    ll freq;
-    trieNode *left, *right;
-    trieNode()
+    ll cnt;
+    struct Node *child[2];
+    Node() : cnt(0LL)
     {
-        freq = 0;
-        left = NULL;
-        right = NULL;
+        child[0] = NULL;
+        child[1] = NULL;
     }
 };
-
-void insert(ll n, trieNode *root)
+struct BitTrie
 {
-    trieNode *curr = root;
-    for (ll i = 31; i >= 0; i--)
+    Node *root;
+    BitTrie()
     {
-        ll bit = (1 << i) & n;
-        if (bit)
-        {
-            if (!curr->right)
-                curr->right = new trieNode();
-            curr = curr->right;
-            curr->freq++;
-        }
-        else
-        {
-            if (!curr->left)
-                curr->left = new trieNode();
-            curr = curr->left;
-            curr->freq++;
-        }
+        root = new Node;
     }
-}
-
-void erase(ll n, trieNode *root)
-{
-    trieNode *curr = root;
-    for (ll i = 31; i >= 0; i--)
+    void insert(ll x)
     {
-        ll bit = (1 << i) & n;
-        if (bit)
+        Node *curr = root;
+        for (ll i = BIT; i >= 0; i--)
         {
-            curr->right->freq--;
-            curr = curr->right;
+            ll bit = ((x & (1LL << i)) ? 1 : 0);
+            curr->cnt++;
+            if (curr->child[bit] == NULL)
+                curr->child[bit] = new Node;
+            curr = curr->child[bit];
         }
-        else
-        {
-            curr->left->freq--;
-            curr = curr->left;
-        }
+        curr->cnt++;
     }
-}
-
-ll xork(ll n, ll k, trieNode *root)
-{
-    trieNode *curr = root;
-    ll ans = 0;
-    for (ll i = 31; i >= 0; i--)
+    void remove(ll x)
     {
-        if (curr == NULL)
-            break;
-        ll bit = (1 << i) & n, kbit = (1 << i) & k;
-        if (bit == kbit)
+        Node *curr = root;
+        for (ll i = BIT; i >= 0; i--)
         {
-            if (kbit)
-                if (curr->right)
-                    ans += curr->right->freq;
-            curr = curr->left;
+            ll bit = ((x & (1LL << i)) ? 1 : 0);
+            curr->cnt--;
+            curr = curr->child[bit];
         }
-        else
-        {
-            if (kbit)
-                if (curr->left)
-                    ans += curr->left->freq;
-            curr = curr->right;
-        }
+        curr->cnt--;
     }
-    return ans;
-}
-
-void solve()
-{
-    ll n, k;
-    cin >> n >> k;
-    vector<ll> a(n);
-    for (int i = 0; i < n; i++)
-        cin >> a[i];
-    trieNode *root = new trieNode();
-    insert(0, root);
-    ll ans = 0, pre = 0;
-    for (int i = 0; i < n; i++)
+    ll query(ll x, ll k)
     {
-        pre ^= a[i];
-        ans += xork(pre, k, root);
-        insert(pre, root);
+        ll ans = 0;
+        Node *curr = root;
+        for (ll i = BIT; i >= 0; i--)
+        {
+            if (curr == NULL)
+                break;
+            ll bit = ((x & (1LL << i)) ? 1 : 0);
+            ll kbit = ((k & (1LL << i)) ? 1 : 0);
+            if (bit == kbit)
+            {
+                if (kbit == 1)
+                    if (curr->child[1])
+                        ans += curr->child[1]->cnt;
+                curr = curr->child[0];
+            }
+            else
+            {
+                if (kbit == 1)
+                    if (curr->child[0])
+                        ans += curr->child[0]->cnt;
+                curr = curr->child[1];
+            }
+        }
+        return ans;
     }
-    cout << ans << endl;
-    return;
-}
-int main(int argc, char const *argv[])
+};
+int main()
 {
     ios::sync_with_stdio(0);
     cin.tie(0);
     cout.tie(0);
+
     ll t;
     cin >> t;
     while (t--)
     {
-        solve();
+        ll n, k;
+        cin >> n >> k;
+        vector<ll> a(n);
+        for (ll i = 0; i < n; i++)
+            cin >> a[i];
+
+        BitTrie trie;
+        trie.insert(0);
+        ll ans = 0, curr = 0;
+        for (ll i = 0; i < n; i++)
+        {
+            curr ^= a[i];
+            ans += trie.query(curr, k);
+            trie.insert(curr);
+        }
+        cout << ans << endl;
     }
+
     return 0;
 }
