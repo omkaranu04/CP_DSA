@@ -2,59 +2,64 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
-const ll mod = 1e9 + 7;
-ll m, d, len;
+const int mod = 1e9 + 7;
+ll M, D, len;
 string L, R;
 ll dp[2020][2][2][2020];
-ll rec(ll level, ll lth, ll rth, ll num)
+ll rec(ll level, ll ltight, ll rtight, ll currmod)
 {
     if (level == len)
-        return (num % m == 0);
-    if (dp[level][lth][rth][num] != -1)
-        return dp[level][lth][rth][num];
+    {
+        if (currmod == 0)
+            return 1;
+        return 0;
+    }
+    if (dp[level][ltight][rtight][currmod] != -1)
+        return dp[level][ltight][rtight][currmod];
 
     ll ans = 0, l = 0, r = 9;
-
-    // prune the limits for the range
-    if (lth)
+    if (ltight)
         l = L[level] - '0';
-    if (rth)
+    if (rtight)
         r = R[level] - '0';
 
     for (ll i = l; i <= r; i++)
     {
-        // relax the conditions for the bounds depending on calls
-        ll lthn = lth, rthn = rth;
+        ll nltight = ltight, nrtight = rtight;
         if (i != l)
-            lthn = 0;
+            nltight = 0;
         if (i != r)
-            rthn = 0;
+            nrtight = 0;
 
-        if ((level + 1) % 2 == 0 && i == d)
+        if ((level + 1) % 2 == 0 && i == D)
         {
-            ans += rec(level + 1, lthn, rthn, (10 * num + i) % m);
+            ans += rec(level + 1, nltight, nrtight, (10 * currmod + i) % M);
             ans %= mod;
         }
-        if ((level + 1) % 2 != 0 && i != d)
+        if ((level + 1) % 2 != 0 && i != D)
         {
-            ans += rec(level + 1, lthn, rthn, (10 * num + i) % m);
+            ans += rec(level + 1, nltight, nrtight, (10 * currmod + i) % M);
             ans %= mod;
         }
     }
-    return dp[level][lth][rth][num] = ans;
+
+    return dp[level][ltight][rtight][currmod] = ans;
 }
 void solve()
 {
-    cin >> m >> d;
-    cin >> L >> R;
-    len = R.size(); // given that L and R are of same size, else we need to append 0s at the beginning of the L
+    cin >> M >> D;
+    cin >> L;
+    cin >> R;
+    len = L.length();
 
     memset(dp, -1, sizeof(dp));
-    ll ans = rec(0, 1, 1, 0);
-    cout << ans << endl;
+    cout << rec(0, 1, 1, 0) % mod << endl;
 }
 int main(int argc, char const *argv[])
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
     ll t;
     cin >> t;
     while (t--)
