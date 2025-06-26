@@ -1,27 +1,24 @@
 #include <bits/stdc++.h>
 using namespace std;
-#define ll int64_t
-const ll mod = 1e9 + 7, m = 1e6 + 10;
-ll dp[m][2];
-ll rec(ll i, ll type)
+#define ll long long int
+#define endl "\n"
+const ll MOD = 1e9 + 7;
+const ll MAXN = 1000100;
+ll a[MAXN], b[MAXN];
+void precompute()
 {
-    if (i == 1)
-        return 1;
-    if (dp[i][type] != -1)
-        return dp[i][type];
-    ll ans = 0;
-    if (type == 0)
-        ans = (ans % mod + (2 * 1LL * rec(i - 1, 0)) % mod + rec(i - 1, 1) % mod) % mod;
-    else
-        ans = (ans % mod + (4 * 1LL * rec(i - 1, 1)) % mod + rec(i - 1, 0) % mod) % mod;
-
-    return dp[i][type] = ans;
+    a[1] = b[1] = 1;
+    for (ll i = 2; i < MAXN; i++)
+    {
+        a[i] = (2 * 1LL * a[i - 1] + b[i - 1]) % MOD;
+        b[i] = (4 * 1LL * b[i - 1] + a[i - 1]) % MOD;
+    }
 }
 void solve()
 {
     ll n;
     cin >> n;
-    cout << rec(n, 0) + rec(n, 1) << endl;
+    cout << (a[n] + b[n]) % MOD << endl;
 }
 int main(int argc, char const *argv[])
 {
@@ -30,7 +27,7 @@ int main(int argc, char const *argv[])
     cout.tie(NULL);
     ll t;
     cin >> t;
-    memset(dp, -1, sizeof(dp));
+    precompute();
     while (t--)
     {
         solve();
