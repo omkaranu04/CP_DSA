@@ -28,7 +28,7 @@ int main(int argc, char const *argv[])
     dp.resize(k + 1, -1);
     for (int i = 0; i < n; i++)
         cin >> a[i];
-    // RECURSION FAIL ON MANY TEST CASES
+    // RECURSION FAIL ON MANY TEST CASES (RECUSTION STACK DEPTH)
     // cout << (rec(k) ? "First" : "Second") << endl;
 
     // iter solution

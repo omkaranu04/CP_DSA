@@ -1,38 +1,50 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll n;
-vector<ll> a;
-vector<vector<ll>> dp;
-ll rec(ll l, ll r)
+#define endl "\n"
+const ll mod = 1e9 + 7;
+ll N;
+ll a[3010];
+ll dpj[3010][3010], dpt[3010][3010];
+ll taro(ll l, ll r);
+ll jiro(ll l, ll r);
+
+ll jiro(ll l, ll r)
 {
-    if (l == r)
-        return a[l];
+    if (l > r)
+        return 0;
+    if (dpj[l][r] != -1)
+        return dpj[l][r];
 
-    if (dp[l][r] != -1)
-        return dp[l][r];
+    ll takeL = taro(l + 1, r) - a[l];
+    ll takeR = taro(l, r - 1) - a[r];
 
-    ll ans = max(a[l] - rec(l + 1, r), a[r] - rec(l, r - 1));
+    return dpj[l][r] = min(takeL, takeR);
+}
+ll taro(ll l, ll r)
+{
+    if (l > r)
+        return 0;
+    if (dpt[l][r] != -1)
+        return dpt[l][r];
 
-    return dp[l][r] = ans;
+    ll takeL = a[l] + jiro(l + 1, r);
+    ll takeR = a[r] + jiro(l, r - 1);
+
+    return dpt[l][r] = max(takeL, takeR);
 }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    cin >> n;
-    a.resize(n);
-    dp.resize(n, vector<ll>(n, -1));
-    ll sum = 0;
-    for (ll i = 0; i < n; i++)
-    {
+    cin >> N;
+    for (ll i = 1; i <= N; i++)
         cin >> a[i];
-        sum += a[i];
-    }
-    ll s1 = (sum + rec(0, n - 1)) / 2;
-    ll s2 = sum - s1;
 
-    cout << s1 - s2 << endl;
+    memset(dpj, -1, sizeof(dpj));
+    memset(dpt, -1, sizeof(dpt));
+
+    cout << taro(1, N);
     return 0;
 }
