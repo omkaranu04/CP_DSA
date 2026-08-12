@@ -1,58 +1,65 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll max(ll a, ll b)
-{
-    return a > b ? a : b;
-}
+#define endl "\n"
+const ll MOD = 1e9 + 7;
 void solve()
 {
     ll n;
     cin >> n;
     string s;
     cin >> s;
-    ll ans = n;
-    if (!(n % 2))
+    if (s.length() % 2 == 0)
     {
-        vector<ll> a[2] = {vector<ll>(26, 0), vector<ll>(26, 0)};
-        for (int i = 0; i < n; i++)
+        vector<ll> even(26, 0), odd(26, 0);
+        for (ll i = 0; i < n; i++)
         {
-            a[i % 2][s[i] - 'a']++;
+            if (i % 2 == 0)
+                even[s[i] - 'a']++;
+            else
+                odd[s[i] - 'a']++;
         }
-        for (int i = 0; i < 2; i++)
+        ll maxeven = LLONG_MIN, maxodd = LLONG_MIN;
+        for (ll i = 0; i < 26; i++)
         {
-            ll maxi = INT_MIN;
-            for (int j = 0; j < 26; j++)
-            {
-                maxi = max(maxi, a[i][j]);
-            }
-            ans -= maxi;
+            maxeven = max(maxeven, even[i]);
+            maxodd = max(maxodd, odd[i]);
         }
-        cout << ans << endl;
+        cout << n - maxeven - maxodd << endl;
     }
     else
     {
-        vector<int> prefix[2] = {vector<int>(26), vector<int>(26)};
-        vector<int> suffix[2] = {vector<int>(26), vector<int>(26)};
-        for (int i = 0; i < n; i++)
+        vector<ll> lefteven(26, 0), leftodd(26, 0), righteven(26, 0), rightodd(26, 0);
+        ll ans = LLONG_MAX;
+        for (ll i = 0; i < n; i++)
         {
-            suffix[i % 2][s[i] - 'a']++;
+            if (i % 2 == 0)
+                righteven[s[i] - 'a']++;
+            else
+                rightodd[s[i] - 'a']++;
         }
-        for (int i = 0; i < n; i++)
+        for (ll i = 0; i < n; i++)
         {
-            suffix[i % 2][s[i] - 'a']--;
-            ll temp = n;
-            for (int k = 0; k < 2; k++)
+            // remove
+            if (i % 2 == 0)
+                righteven[s[i] - 'a']--;
+            else
+                rightodd[s[i] - 'a']--;
+
+            // calculate
+            ll maxeven = LLONG_MIN, maxodd = LLONG_MIN;
+            for (ll j = 0; j < 26; j++)
             {
-                ll maxi = 0;
-                for (int j = 0; j < 26; j++)
-                {
-                    maxi = max(maxi, prefix[k][j] + suffix[1 - k][j]);
-                }
-                temp -= maxi;
+                maxeven = max(maxeven, lefteven[j] + rightodd[j]);
+                maxodd = max(maxodd, leftodd[j] + righteven[j]);
             }
-            ans = min(ans, temp);
-            prefix[i % 2][s[i] - 'a']++;
+            ans = min(ans, 1 + n - 1 - maxeven - maxodd);
+
+            // add
+            if (i % 2 == 0)
+                lefteven[s[i] - 'a']++;
+            else
+                leftodd[s[i] - 'a']++;
         }
         cout << ans << endl;
     }
@@ -61,6 +68,7 @@ int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
+    cout.tie(NULL);
     ll t;
     cin >> t;
     while (t--)

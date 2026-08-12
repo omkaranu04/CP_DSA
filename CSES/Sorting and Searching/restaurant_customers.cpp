@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
+#define endl "\n"
+const ll MOD = 1e9 + 7;
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
@@ -8,19 +10,19 @@ int main(int argc, char const *argv[])
     cout.tie(NULL);
     ll n;
     cin >> n;
-    vector<pair<ll, ll>> times;
+    vector<pair<ll, ll>> x(n);
     for (ll i = 0; i < n; i++)
     {
         ll a, b;
         cin >> a >> b;
-        times.push_back({a, 1});
-        times.push_back({b, -1});
+        x.push_back({a, 1});
+        x.push_back({b, -1});
     }
-    sort(times.begin(), times.end());
+    sort(x.begin(), x.end());
     ll ans = 0, cnt = 0;
-    for (ll i = 0; i < 2 * n; i++)
+    for (auto p : x)
     {
-        cnt += times[i].second;
+        cnt += p.second;
         ans = max(ans, cnt);
     }
     cout << ans << endl;
