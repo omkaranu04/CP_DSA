@@ -16,19 +16,6 @@ int main(int argc, char const *argv[])
     ps[0] = x;
     for (ll i = 1; i < n; i++)
         ps[i] = ((ps[i - 1] * 1LL * a) % c + b) % c;
-    ll ans = 0, sum = 0;
-    for (ll i = 0; i < k; i++)
-        sum += ps[i];
-    ans = sum;
-    ll i = 0, j = k;
-    while (j < n)
-    {
-        sum += ps[j];
-        sum -= ps[i];
-        i++;
-        j++;
-        ans ^= sum;
-    }
-    cout << ans << endl;
+    
     return 0;
 }

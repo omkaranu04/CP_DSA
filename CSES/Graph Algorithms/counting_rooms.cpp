@@ -1,47 +1,46 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll dx[4] = {0, 0, -1, 1};
-ll dy[4] = {-1, 1, 0, 0};
+#define endl "\n"
+const ll MOD = 1e9 + 7;
 ll n, m;
-vector<vector<char>> grid;
-vector<vector<bool>> visited;
-bool check(ll x, ll y)
-{
-    return x >= 0 && x < n && y >= 0 && y < m;
-}
+vector<string> g;
+vector<vector<ll>> vis;
+vector<ll> dx = {1, -1, 0, 0};
+vector<ll> dy = {0, 0, 1, -1};
+inline bool check(ll x, ll y) { return x >= 0 && x < n && y >= 0 && y < m; }
 void dfs(ll x, ll y)
 {
-    visited[x][y] = true;
+    vis[x][y] = 1;
     for (ll i = 0; i < 4; i++)
     {
         ll nx = x + dx[i], ny = y + dy[i];
-        if (check(nx, ny) && !visited[nx][ny] && grid[nx][ny] == '.')
+        if (check(nx, ny) && !vis[nx][ny] && g[nx][ny] == '.')
             dfs(nx, ny);
     }
 }
-int main()
+int main(int argc, char const *argv[])
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
     cin >> n >> m;
-    grid.resize(n, vector<char>(m));
-    visited.resize(n, vector<bool>(m, false));
-    for (ll i = 0; i < n; i++)
-    {
-        for (ll j = 0; j < m; j++)
-            cin >> grid[i][j];
-    }
+    g.resize(n);
+    for (auto &x : g)
+        cin >> x;
+    vis.resize(n, vector<ll>(m, 0));
     ll ans = 0;
     for (ll i = 0; i < n; i++)
     {
         for (ll j = 0; j < m; j++)
         {
-            if (!visited[i][j] && grid[i][j] == '.')
+            if (!vis[i][j] && g[i][j] == '.')
             {
                 dfs(i, j);
                 ans++;
             }
         }
     }
-    cout << ans << endl;
+    cout << ans;
     return 0;
 }

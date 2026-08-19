@@ -1,16 +1,19 @@
 #include <bits/stdc++.h>
 using namespace std;
-void dfs(int node, int parent, int depth, vector<int> &par, vector<int> &sub, vector<int> &dep, vector<int> g[])
+#define ll long long int
+#define endl "\n"
+const ll MOD = 1e9 + 7;
+vector<vector<ll>> g;
+vector<ll> sz, vis;
+void dfs(ll node)
 {
-    par[node] = parent;
-    dep[node] = depth;
-    sub[node] = 1;
-    for (auto i : g[node])
+    vis[node] = 1;
+    for (auto v : g[node])
     {
-        if (i != parent)
+        if (!vis[v])
         {
-            dfs(i, node, depth + 1, par, sub, dep, g);
-            sub[node] += sub[i];
+            dfs(v);
+            sz[node] += sz[v];
         }
     }
 }
@@ -19,20 +22,20 @@ int main(int argc, char const *argv[])
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    int n;
+    ll n;
     cin >> n;
-    vector<int> g[n + 1], par(n + 1), sub(n + 1), dep(n + 1);
-    for (int i = 2; i <= n; i++)
+    g.resize(n + 1);
+    sz.resize(n + 1, 1);
+    vis.resize(n + 1, 0);
+    for (ll i = 2; i <= n; i++)
     {
-        int x;
+        ll x;
         cin >> x;
         g[x].push_back(i);
         g[i].push_back(x);
     }
-    dfs(1, 0, 0, par, sub, dep, g);
-    for (int i = 1; i <= n; i++)
-    {
-        cout << sub[i] - 1 << " ";
-    }
+    dfs(1);
+    for (ll i = 1; i <= n; i++)
+        cout << sz[i] - 1 << " ";
     return 0;
 }

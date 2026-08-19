@@ -1,30 +1,31 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
+#define endl "\n"
+const ll MOD = 1e9 + 7;
 ll n, m;
 vector<vector<ll>> g;
-vector<ll> color;
-bool bfs(ll src)
+vector<ll> vis;
+bool dfs(ll node, ll team)
 {
-    queue<ll> q;
-    q.push(src);
-    color[src] = 1;
-
-    while (!q.empty())
+    vis[node] = team;
+    for (auto v : g[node])
     {
-        ll node = q.front();
-        q.pop();
-
-        for (auto v : g[node])
+        if (vis[v] == 0)
         {
-            if (color[v] == -1)
+            if (team == 1)
             {
-                color[v] = 3 - color[node];
-                q.push(v);
+                if (!dfs(v, 2))
+                    return false;
             }
-            else if (color[v] == color[node])
-                return false;
+            else
+            {
+                if (!dfs(v, 1))
+                    return false;
+            }
         }
+        else if (vis[v] == team)
+            return false;
     }
     return true;
 }
@@ -35,19 +36,19 @@ int main(int argc, char const *argv[])
     cout.tie(NULL);
     cin >> n >> m;
     g.resize(n + 1);
-    color.resize(n + 1, -1);
-    for (ll i = 0; i < m; i++)
+    vis.resize(n + 1, 0);
+    for (ll i = 1; i <= m; i++)
     {
-        ll u, v;
-        cin >> u >> v;
-        g[u].push_back(v);
-        g[v].push_back(u);
+        ll a, b;
+        cin >> a >> b;
+        g[a].push_back(b);
+        g[b].push_back(a);
     }
     for (ll i = 1; i <= n; i++)
     {
-        if (color[i] == -1)
+        if (!vis[i])
         {
-            if (!bfs(i))
+            if (!dfs(i, 1))
             {
                 cout << "IMPOSSIBLE\n";
                 return 0;
@@ -55,6 +56,6 @@ int main(int argc, char const *argv[])
         }
     }
     for (ll i = 1; i <= n; i++)
-        cout << color[i] << " ";
+        cout << vis[i] << " ";
     return 0;
 }
