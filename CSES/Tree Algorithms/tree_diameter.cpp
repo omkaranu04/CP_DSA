@@ -1,16 +1,19 @@
 #include <bits/stdc++.h>
 using namespace std;
-void dfs(int node, int parent, int depth, vector<int> &dep, vector<int> &par, vector<int> g[])
+#define ll long long int
+#define endl "\n"
+const ll MOD = 1e9 + 7;
+ll n;
+vector<vector<ll>> g;
+vector<ll> visited, depth;
+void dfs(ll u, ll d)
 {
-    dep[node] = depth;
-    par[node] = parent;
-
-    for (auto v : g[node])
+    visited[u] = 1;
+    depth[u] = d;
+    for (auto v : g[u])
     {
-        if (v != parent)
-        {
-            dfs(v, node, depth + 1, dep, par, g);
-        }
+        if (!visited[v])
+            dfs(v, d + 1);
     }
 }
 int main(int argc, char const *argv[])
@@ -18,35 +21,42 @@ int main(int argc, char const *argv[])
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    int n;
     cin >> n;
-    vector<int> g[n + 1], dep(n + 1), par(n + 1);
-    for (int i = 0; i < n - 1; i++)
+    g.resize(n + 1);
+    visited.resize(n + 1, 0);
+    depth.resize(n + 1, 0);
+    for (ll i = 1; i <= n - 1; i++)
     {
-        int u, v;
-        cin >> u >> v;
-        g[u].push_back(v);
-        g[v].push_back(u);
+        ll a, b;
+        cin >> a >> b;
+        g[a].push_back(b);
+        g[b].push_back(a);
     }
-    // for tree diameter
-    int maxcn = 1;
-    dfs(1, 0, 0, dep, par, g);
-    for (int i = 1; i <= n; i++)
+    dfs(1, 0);
+    ll src = -1, currMax = -1;
+    for (ll i = 1; i <= n; i++)
     {
-        if (dep[i] > dep[maxcn])
+        if (depth[i] > currMax)
         {
-            maxcn = i;
+            src = i;
+            currMax = depth[i];
         }
     }
-    dfs(maxcn, 0, 0, dep, par, g);
-    int maxd = 1;
-    for (int i = 1; i <= n; i++)
+
+    fill(visited.begin(), visited.end(), 0);
+    fill(depth.begin(), depth.end(), 0);
+    dfs(src, 0);
+
+    src = -1;
+    currMax = -1;
+    for (ll i = 1; i <= n; i++)
     {
-        if (dep[i] > dep[maxd])
+        if (depth[i] > currMax)
         {
-            maxd = i;
+            src = i;
+            currMax = depth[i];
         }
     }
-    cout << dep[maxd] << endl;
+    cout << currMax << endl;
     return 0;
 }

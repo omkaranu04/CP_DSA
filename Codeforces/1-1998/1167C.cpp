@@ -2,26 +2,17 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
-const ll MOD = 1e9 + 7;
-ll n, m;
-vector<vector<ll>> g;
 struct DSU
 {
     ll n;
-    vector<ll> par, sz;
-    ll num_comps, max_comp;
+    vector<ll> sz, par;
     DSU(ll _n)
     {
         n = _n;
-        num_comps = _n;
-        max_comp = 1;
+        sz.resize(n + 1, 1);
         par.resize(n + 1);
-        sz.resize(n + 1);
-        for (ll i = 1; i <= n; i++)
-        {
+        for (ll i = 0; i <= n; i++)
             par[i] = i;
-            sz[i] = 1;
-        }
     }
     ll find(ll x)
     {
@@ -35,13 +26,10 @@ struct DSU
         y = find(y);
         if (x == y)
             return;
-        // x is smaller
         if (x > y)
             swap(x, y);
         par[x] = y;
         sz[y] += sz[x];
-        num_comps--;
-        max_comp = max(max_comp, sz[y]);
     }
 };
 int main(int argc, char const *argv[])
@@ -49,15 +37,25 @@ int main(int argc, char const *argv[])
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
+    ll n, m;
     cin >> n >> m;
-    g.resize(n + 1);
     DSU dsu(n);
-    for (ll i = 1; i <= m; i++)
+    while (m--)
     {
-        ll a, b;
-        cin >> a >> b;
-        dsu.merge(a, b);
-        cout << dsu.num_comps << " " << dsu.max_comp << endl;
+        ll k;
+        cin >> k;
+        if (k == 0)
+            continue;
+        ll u;
+        cin >> u;
+        for (ll i = 1; i < k; i++)
+        {
+            ll v;
+            cin >> v;
+            dsu.merge(u, v);
+        }
     }
+    for (ll i = 1; i <= n; i++)
+        cout << dsu.sz[dsu.find(i)] << " ";
     return 0;
 }

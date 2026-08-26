@@ -18,10 +18,10 @@ int main(int argc, char const *argv[])
     {
         ll a, b;
         cin >> a >> b;
-        g[a].push_back(b);
-        indeg[b]++;
+        g[b].push_back(a);
+        indeg[a]++;
     }
-    priority_queue<ll, vector<ll>, greater<ll>> pq;
+    priority_queue<ll> pq;
     for (ll i = 1; i <= n; i++)
         if (indeg[i] == 0)
             pq.push(i);
@@ -37,6 +37,7 @@ int main(int argc, char const *argv[])
                 pq.push(v);
         }
     }
+    reverse(ans.begin(), ans.end());
     if (1LL * ans.size() != n)
         cout << "IMPOSSIBLE\n";
     else
