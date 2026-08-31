@@ -37,9 +37,10 @@ struct DSU
 };
 struct Edge
 {
-    ll a, b, c;
+    ll idx;
+    ll a, b, w;
 };
-bool comp(Edge a, Edge b) { return a.c < b.c; }
+bool comp(Edge a, Edge b) { return a.w < b.w; }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
@@ -48,24 +49,31 @@ int main(int argc, char const *argv[])
     ll n, m;
     cin >> n >> m;
     vector<Edge> edges(m);
+    vector<bool> edgeUsed(m, false);
     DSU dsu(n);
     for (ll i = 0; i < m; i++)
-        cin >> edges[i].a >> edges[i].b >> edges[i].c;
-    sort(edges.begin(), edges.end(), comp);
-    ll ans = 0;
-    for (ll i = 0; i < m; i++)
     {
-        ll u = edges[i].a, v = edges[i].b, c = edges[i].c;
-        if (dsu.merge(u, v))
-        {
-            ans += c;
-            if (dsu.comp == 1)
-                break;
-        }
+        cin >> edges[i].a >> edges[i].b >> edges[i].w;
+        edges[i].idx = i;
     }
-    if (dsu.comp == 1)
-        cout << ans << endl;
-    else
-        cout << "IMPOSSIBLE\n";
+    sort(edges.begin(), edges.end(), comp);
+    ll i = 0;
+    while (i < m)
+    {
+        ll j = i;
+        while (j < m && edges[j].w == edges[i].w)
+            j++;
+        for (ll k = i; k < j; k++)
+        {
+            ll u = edges[k].a, v = edges[k].b;
+            if (dsu.find(u) != dsu.find(v))
+                edgeUsed[edges[k].idx] = true;
+        }
+        for (ll k = i; k < j; k++)
+            dsu.merge(edges[k].a, edges[k].b);
+        i = j;
+    }
+    for (ll i = 0; i < m; i++)
+        cout << (edgeUsed[i] ? "YES\n" : "NO\n");
     return 0;
 }

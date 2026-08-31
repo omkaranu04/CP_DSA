@@ -5,7 +5,7 @@ using namespace std;
 struct DSU
 {
     ll n, comp;
-    vector<ll> par, sz;
+    vector<ll> sz, par;
     DSU(ll _n)
     {
         n = _n;
@@ -21,25 +21,19 @@ struct DSU
             return x;
         return par[x] = find(par[x]);
     }
-    bool merge(ll x, ll y)
+    void merge(ll x, ll y)
     {
         x = find(x);
         y = find(y);
         if (x == y)
-            return false;
+            return;
         if (sz[x] > sz[y])
             swap(x, y);
         par[x] = y;
         sz[y] += sz[x];
         comp--;
-        return true;
     }
 };
-struct Edge
-{
-    ll a, b, c;
-};
-bool comp(Edge a, Edge b) { return a.c < b.c; }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
@@ -47,25 +41,31 @@ int main(int argc, char const *argv[])
     cout.tie(NULL);
     ll n, m;
     cin >> n >> m;
-    vector<Edge> edges(m);
+    vector<bool> edgeUsed(m + 1, false);
     DSU dsu(n);
-    for (ll i = 0; i < m; i++)
-        cin >> edges[i].a >> edges[i].b >> edges[i].c;
-    sort(edges.begin(), edges.end(), comp);
-    ll ans = 0;
-    for (ll i = 0; i < m; i++)
+    vector<pair<ll, ll>> edges(m + 1);
+    for (ll i = 1; i <= m; i++)
+        cin >> edges[i].first >> edges[i].second;
+    ll q;
+    cin >> q;
+    vector<ll> queryEdges(q + 1);
+    for (ll i = 1; i <= q; i++)
     {
-        ll u = edges[i].a, v = edges[i].b, c = edges[i].c;
-        if (dsu.merge(u, v))
-        {
-            ans += c;
-            if (dsu.comp == 1)
-                break;
-        }
+        cin >> queryEdges[i];
+        edgeUsed[queryEdges[i]] = true;
     }
-    if (dsu.comp == 1)
-        cout << ans << endl;
-    else
-        cout << "IMPOSSIBLE\n";
+    vector<ll> ans;
+    for (ll i = 1; i <= m; i++)
+        if (!edgeUsed[i])
+            dsu.merge(edges[i].first, edges[i].second);
+    for (ll i = q; i >= 1; i--)
+    {
+        ans.push_back(dsu.comp);
+        ll x = edges[queryEdges[i]].first, y = edges[queryEdges[i]].second;
+        dsu.merge(x, y);
+    }
+    reverse(ans.begin(), ans.end());
+    for (auto x : ans)
+        cout << x << " ";
     return 0;
 }

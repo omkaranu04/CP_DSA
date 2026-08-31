@@ -62,7 +62,7 @@ int main(int argc, char const *argv[])
         }
         if (depth[curr] == depth[prev])
         {
-            if (position[parent[curr]] > position[parent[curr]])
+            if (position[parent[prev]] > position[parent[curr]])
             {
                 cout << "No\n";
                 return 0;

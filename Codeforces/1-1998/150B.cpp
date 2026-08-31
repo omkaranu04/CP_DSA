@@ -2,10 +2,11 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
+const ll MOD = 1e9 + 7;
 struct DSU
 {
     ll n, comp;
-    vector<ll> par, sz;
+    vector<ll> sz, par;
     DSU(ll _n)
     {
         n = _n;
@@ -21,51 +22,53 @@ struct DSU
             return x;
         return par[x] = find(par[x]);
     }
-    bool merge(ll x, ll y)
+    void merge(ll x, ll y)
     {
         x = find(x);
         y = find(y);
         if (x == y)
-            return false;
+            return;
         if (sz[x] > sz[y])
             swap(x, y);
         par[x] = y;
         sz[y] += sz[x];
         comp--;
-        return true;
     }
 };
-struct Edge
+ll modpow(ll a, ll b)
 {
-    ll a, b, c;
-};
-bool comp(Edge a, Edge b) { return a.c < b.c; }
+    if (b == 0)
+        return 1;
+    ll t = modpow(a, b / 2);
+    t = (t * 1LL * t) % MOD;
+    if (b % 2)
+        return (t * 1LL * a) % MOD;
+    else
+        return t;
+}
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    ll n, m;
-    cin >> n >> m;
-    vector<Edge> edges(m);
-    DSU dsu(n);
-    for (ll i = 0; i < m; i++)
-        cin >> edges[i].a >> edges[i].b >> edges[i].c;
-    sort(edges.begin(), edges.end(), comp);
-    ll ans = 0;
-    for (ll i = 0; i < m; i++)
+    ll n, m, k;
+    cin >> n >> m >> k;
+    if (k > n)
     {
-        ll u = edges[i].a, v = edges[i].b, c = edges[i].c;
-        if (dsu.merge(u, v))
+        cout << modpow(m, n);
+        return 0;
+    }
+
+    DSU dsu(n);
+    for (ll i = 0; i + k <= n; i++)
+    {
+        for (ll j = 0; j < k / 2; j++)
         {
-            ans += c;
-            if (dsu.comp == 1)
-                break;
+            ll l = i + j;
+            ll r = i + k - 1 - j;
+            dsu.merge(l, r);
         }
     }
-    if (dsu.comp == 1)
-        cout << ans << endl;
-    else
-        cout << "IMPOSSIBLE\n";
+    cout << modpow(m, dsu.comp);
     return 0;
 }
