@@ -1,77 +1,94 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll n, q;
-vector<ll> a, segTree;
-void build(ll index, ll l, ll r)
+#define endl "\n"
+const ll INF = 1e18;
+struct SegTree
 {
-    if (l == r)
+    ll n;
+    vector<ll> a, st;
+    SegTree(ll _n, const vector<ll> &_a)
     {
-        // base case you arrive at the leaf
-        segTree[index] = a[l];
-        return;
+        n = _n;
+        a = _a;
+        st.resize(4 * n + 10);
+        build(1, 0, n - 1);
     }
-    ll mid = (l + r) / 2;
-    // halve and call the left and right child
-    build(2 * index, l, mid);
-    build(2 * index + 1, mid + 1, r);
+    void build(ll n, ll l, ll r)
+    {
+        if (l == r)
+        {
+            st[n] = a[l];
+            return;
+        }
+        ll m = (l + r) / 2;
+        build(n << 1, l, m);
+        build((n << 1) + 1, m + 1, r);
+        st[n] = min(st[n << 1], st[(n << 1) + 1]);
+    }
+    void update(ll n, ll l, ll r, ll pos, ll val)
+    {
+        if (l == r)
+        {
+            st[n] = val;
+            a[pos] = val;
+            return;
+        }
 
-    // after left and right update the current node
-    segTree[index] = min(segTree[2 * index], segTree[2 * index + 1]);
-}
-void update(ll index, ll l, ll r, ll i, ll x)
-{
-    if (l == r)
-    {
-        segTree[index] = x;
-        return;
+        ll m = (l + r) / 2;
+        if (pos <= m)
+            update(n << 1, l, m, pos, val);
+        else
+            update((n << 1 )+ 1, m + 1, r, pos, val);
+        st[n] = min(st[n << 1], st[(n << 1) + 1]);
     }
-    ll mid = (l + r) / 2;
-    if (i <= mid)
-        update(2 * index, l, mid, i, x);
-    else
-        update(2 * index + 1, mid + 1, r, i, x);
-    segTree[index] = min(segTree[2 * index], segTree[2 * index + 1]);
-    return;
-}
-ll query(ll index, ll l, ll r, ll ql, ll qr)
-{
-    if (l > qr || r < ql)
-        return 1e18;
-    if (l >= ql && r <= qr)
-        return segTree[index];
-    ll mid = (l + r) / 2;
-    return min(query(2 * index, l, mid, ql, qr), query(2 * index + 1, mid + 1, r, ql, qr));
-}
+    void update(ll pos, ll val)
+    {
+        update(1, 0, n - 1, pos, val);
+    }
+    ll query(ll n, ll l, ll r, ll ql, ll qr)
+    {
+        if (r < ql || l > qr)
+            return INF;
+        if (l >= ql && r <= qr)
+            return st[n];
+        ll m = (l + r) / 2;
+        return min(query(n << 1, l, m, ql, qr), query((n << 1) + 1, m + 1, r, ql, qr));
+    }
+    ll query(ll l, ll r)
+    {
+        return query(1, 0, n - 1, l, r);
+    }
+};
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
+    ll n, q;
     cin >> n >> q;
-    a.resize(n);
-    segTree.resize(4 * n + 1);
-    for (ll i = 0; i < n; i++)
-        cin >> a[i];
-    build(1, 0, n - 1);
+    vector<ll> a(n);
+    for (auto &x : a)
+        cin >> x;
+    SegTree seg(n, a);
     while (q--)
     {
         ll t;
         cin >> t;
         if (t == 1)
         {
-            ll i, x;
-            cin >> i >> x;
-            i--;
-            update(1, 0, n - 1, i, x);
+            ll k, u;
+            cin >> k >> u;
+            k--;
+            seg.update(k, u);
         }
-        else if (t == 2)
+        if (t == 2)
         {
-            ll l, r;
-            cin >> l >> r;
-            l--, r--;
-            // cout << "Ans : ";
-            cout << query(1, 0, n - 1, l, r) << endl;
+            ll a, b;
+            cin >> a >> b;
+            a--;
+            b--;
+            cout << seg.query(a, b) << endl;
         }
     }
     return 0;

@@ -2,80 +2,101 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
-ll n, q;
-vector<ll> p;
-struct node
+struct SegTree
 {
-    multiset<ll> ms;
+    ll n;
+    vector<ll> st;
+    SegTree(const ll _n)
+    {
+        n = _n;
+        st.resize(4 * n + 10);
+    }
+    void update(ll n, ll l, ll r, ll pos, ll val)
+    {
+        if (l == r)
+        {
+            st[n] += val;
+            return;
+        }
+        ll m = (l + r) / 2;
+        if (pos <= m)
+            update(2 * n, l, m, pos, val);
+        else
+            update(2 * n + 1, m + 1, r, pos, val);
+        st[n] = st[2 * n] + st[2 * n + 1];
+    }
+    void update(ll pos, ll val)
+    {
+        update(1, 0, n - 1, pos, val);
+    }
+    ll query(ll n, ll l, ll r, ll ql, ll qr)
+    {
+        if (r < ql || l > qr)
+            return 0;
+        if (l >= ql && r <= qr)
+            return st[n];
+        ll m = (l + r) / 2;
+        return query(2 * n, l, m, ql, qr) + query(2 * n + 1, m + 1, r, ql, qr);
+    }
+    ll query(ll l, ll r)
+    {
+        return query(1, 0, n - 1, l, r);
+    }
 };
-vector<node> segTree;
-node merge(node l, node r)
+struct Query
 {
-    node ans;
-    ans.ms.insert(l.ms.begin(), l.ms.end());
-    ans.ms.insert(r.ms.begin(), r.ms.end());
-    return ans;
-}
-void build(ll id, ll l, ll r)
-{
-    if (l == r)
-    {
-        segTree[id].ms.insert(p[l]);
-        return;
-    }
-    ll mid = (l + r) / 2;
-    build(2 * id, l, mid);
-    build(2 * id + 1, mid + 1, r);
-    segTree[id] = merge(segTree[2 * id], segTree[2 * id + 1]);
-}
-void update(ll id, ll l, ll r, ll pos, ll oldval, ll newval)
-{
-    if (pos < l || pos > r)
-        return;
-    if (l == r)
-    {
-        segTree[id].ms.erase(segTree[id].ms.find(oldval));
-        segTree[id].ms.insert(newval);
-        return;
-    }
-    ll mid = (l + r) / 2;
-    update(2 * id, l, mid, pos, oldval, newval);
-    update(2 * id + 1, mid + 1, r, pos, oldval, newval);
-    segTree[id] = merge(segTree[2 * id], segTree[2 * id + 1]);
-}
+    char type;
+    ll a, b;
+};
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
+    ll n, q;
     cin >> n >> q;
-    p.resize(n);
-    segTree.resize(4 * n + 1);
-    for (ll i = 0; i < n; i++)
-        cin >> p[i];
-    while (q--)
+    vector<ll> p(n);
+    for (auto &x : p)
+        cin >> x;
+    vector<Query> queries;
+    vector<ll> coords;
+    for (auto x : p)
+        coords.push_back(x);
+    for (ll i = 0; i < q; i++)
     {
-        char type;
-        cin >> type;
-        if (type == '!')
+        char t;
+        ll a, b;
+        cin >> t >> a >> b;
+        queries.push_back({t, a, b});
+        if (t == '!')
+            coords.push_back(b);
+    }
+    sort(coords.begin(), coords.end());
+    coords.erase(unique(coords.begin(), coords.end()), coords.end());
+
+    SegTree seg(coords.size());
+    auto getIndex = [&](ll x)
+    {
+        return lower_bound(coords.begin(), coords.end(), x) - coords.begin();
+    };
+
+    // initial salaries
+    for (auto x : p)
+        seg.update(getIndex(x), 1);
+
+    for (auto [t, a, b] : queries)
+    {
+        if (t == '!')
         {
-            ll k, x;
-            cin >> k >> x;
-            update(1, 0, n - 1, k - 1, p[k - 1], x);
-            p[k - 1] = x;
+            seg.update(getIndex(p[a - 1]), -1);
+            seg.update(getIndex(b), 1);
+            p[a - 1] = b;
         }
         else
         {
-            ll a, b;
-            cin >> a >> b;
-            auto it = segTree[1].ms.lower_bound(a);
-            ll ans = 0;
-            while (it != segTree[1].ms.end() && *it <= b)
-            {
-                ans++;
-                it++;
-            }
-            cout << ans << endl;
+            ll l = lower_bound(coords.begin(), coords.end(), a) - coords.begin();
+            ll r = upper_bound(coords.begin(), coords.end(), b) - coords.begin() - 1;
+            cout << seg.query(l, r) << endl;
         }
     }
     return 0;

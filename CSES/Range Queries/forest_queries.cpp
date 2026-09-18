@@ -2,7 +2,6 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
-const ll MOD = 1e9 + 7;
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
@@ -11,14 +10,14 @@ int main(int argc, char const *argv[])
     ll n, q;
     cin >> n >> q;
     vector<string> g(n);
-    for (auto &x : g)
-        cin >> x;
+    for (auto &s : g)
+        cin >> s;
     vector<vector<ll>> ps(n + 1, vector<ll>(n + 1, 0));
     for (ll i = 1; i <= n; i++)
     {
         for (ll j = 1; j <= n; j++)
         {
-            ll t = (g[i - 1][j - 1] == '*') ? 1 : 0;
+            ll t = (g[i - 1][j - 1] == '*');
             ps[i][j] = ps[i - 1][j] + ps[i][j - 1] - ps[i - 1][j - 1] + t;
         }
     }

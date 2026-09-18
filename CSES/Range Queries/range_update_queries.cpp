@@ -1,69 +1,75 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll n, q;
-vector<ll> a;
-struct node
+#define endl "\n"
+struct SegTree
 {
-    ll sum;
-    node(ll x = 0)
+    ll n;
+    vector<ll> a, st;
+    SegTree(const ll _n, const vector<ll> &_a)
     {
-        sum = x;
+        n = _n;
+        a = _a;
+        st.resize(4 * n + 10);
+        build(1, 0, n - 1);
+    }
+    void build(ll n, ll l, ll r)
+    {
+        if (l == r)
+        {
+            st[n] = 0;
+            return;
+        }
+        ll m = (l + r) / 2;
+        build(2 * n, l, m);
+        build(2 * n + 1, m + 1, r);
+        st[n] = st[2 * n] + st[2 * n + 1];
+    }
+    void update(ll n, ll l, ll r, ll pos, ll val)
+    {
+        if (l == r)
+        {
+            st[n] += val;
+            return;
+        }
+        ll m = (l + r) / 2;
+        if (pos <= m)
+            update(2 * n, l, m, pos, val);
+        else
+            update(2 * n + 1, m + 1, r, pos, val);
+        st[n] = st[2 * n] + st[2 * n + 1];
+    }
+    void update(ll pos, ll val)
+    {
+        if (pos >= n)
+            return;
+        update(1, 0, n - 1, pos, val);
+    }
+    ll query(ll n, ll l, ll r, ll ql, ll qr)
+    {
+        if (r < ql || l > qr)
+            return 0;
+        if (ql <= l && qr >= r)
+            return st[n];
+        ll m = (l + r) / 2;
+        return query(2 * n, l, m, ql, qr) + query(2 * n + 1, m + 1, r, ql, qr);
+    }
+    ll query(ll l, ll r)
+    {
+        return query(1, 0, n - 1, l, r);
     }
 };
-vector<node> tree;
-node merge(node a, node b)
-{
-    node ans;
-    ans.sum = a.sum + b.sum;
-    return ans;
-}
-void build(ll id, ll l, ll r)
-{
-    if (l == r)
-    {
-        tree[id].sum = 0;
-        return;
-    }
-    ll mid = (l + r) / 2;
-    build(2 * id, l, mid);
-    build(2 * id + 1, mid + 1, r);
-    tree[id] = merge(tree[2 * id], tree[2 * id + 1]);
-}
-void update(ll id, ll l, ll r, ll pos, ll val)
-{
-    if (pos < l || pos > r)
-        return;
-    if (l == r)
-    {
-        tree[id].sum += val;
-        return;
-    }
-    ll mid = (l + r) / 2;
-    update(2 * id, l, mid, pos, val);
-    update(2 * id + 1, mid + 1, r, pos, val);
-    tree[id] = merge(tree[2 * id], tree[2 * id + 1]);
-}
-node query(ll id, ll l, ll r, ll lq, ll rq)
-{
-    if (l > rq || r < lq)
-        return node(0LL);
-    if (lq <= l && r <= rq)
-        return tree[id];
-    ll mid = (l + r) / 2;
-    return merge(query(2 * id, l, mid, lq, rq), query(2 * id + 1, mid + 1, r, lq, rq));
-}
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
+    ll n, q;
     cin >> n >> q;
-    a.resize(n);
-    tree.resize(4 * n + 1);
-    for (ll i = 0; i < n; i++)
-        cin >> a[i];
-    build(1, 0, n - 1);
+    vector<ll> a(n);
+    for (auto &x : a)
+        cin >> x;
+    SegTree seg(n, a);
     while (q--)
     {
         ll t;
@@ -72,17 +78,17 @@ int main(int argc, char const *argv[])
         {
             ll a, b, u;
             cin >> a >> b >> u;
-            a--, b--;
-            update(1, 0, n - 1, a, u);
-            update(1, 0, n - 1, b + 1, -u);
+            a--;
+            b--;
+            seg.update(a, u);
+            seg.update(b + 1, -u);
         }
-        else
+        if (t == 2)
         {
             ll k;
             cin >> k;
             k--;
-            node ans = query(1, 0, n - 1, 0, k);
-            cout << ans.sum + a[k] << endl;
+            cout << seg.query(0, k) + a[k] << endl;
         }
     }
     return 0;
