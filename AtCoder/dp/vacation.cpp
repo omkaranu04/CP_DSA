@@ -1,39 +1,39 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
+const ll MAXN = 100010;
 ll N;
-vector<ll> a, b, c;
-vector<vector<ll>> dp;
-ll rec(ll level, ll prev)
+ll dp[MAXN][4];
+ll a[MAXN], b[MAXN], c[MAXN];
+// starting at day i, previously doing activity prev
+ll rec(ll i, ll prev)
 {
-    // base case
-    if (level == N)
+    // base case -> (i > N has no contribution)
+    if (i > N)
         return 0;
-    if (dp[level][prev] != -1)
-        return dp[level][prev];
-
-    // based on prev_activity
+    // dp check and return
+    if (dp[i][prev] != -1)
+        return dp[i][prev];
+    // transition
     ll ans = 0;
     if (prev != 1)
-        ans = max(ans, rec(level + 1, 1) + a[level]);
+        ans = max(ans, rec(i + 1, 1) + a[i]);
     if (prev != 2)
-        ans = max(ans, rec(level + 1, 2) + b[level]);
+        ans = max(ans, rec(i + 1, 2) + b[i]);
     if (prev != 3)
-        ans = max(ans, rec(level + 1, 3) + c[level]);
-
-    return dp[level][prev] = ans;
+        ans = max(ans, rec(i + 1, 3) + c[i]);
+    // return
+    return dp[i][prev] = ans;
 }
 int main(int argc, char const *argv[])
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    memset(dp, -1, sizeof(dp));
     cin >> N;
-    a.resize(N);
-    b.resize(N);
-    c.resize(N);
-    dp.resize(N + 1, vector<ll>(4, -1));
-    for (ll i = 0; i < N; i++)
-    {
+    for (ll i = 1; i <= N; i++)
         cin >> a[i] >> b[i] >> c[i];
-    }
-    cout << rec(0, 0) << endl;
+    cout << rec(1, 0);
     return 0;
 }

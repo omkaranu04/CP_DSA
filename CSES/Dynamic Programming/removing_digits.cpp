@@ -1,45 +1,38 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll n;
-vector<ll> dp;
-ll rec(ll x)
+#define endl "\n"
+const ll MAXN = 1e6 + 10;
+ll N;
+ll dp[MAXN];
+ll rec(ll rem)
 {
-    if (x == 0)
+    if (rem == 0)
         return 0;
-
-    if (dp[x] != -1)
-        return dp[x];
-
-    // string s = to_string(x);
-    multiset<ll> st;
-    // for (auto i : s)
-    // {
-    //     st.insert(i - '0');
-    // }
-    ll cp = x;
-    while (cp)
+    if (dp[rem] != -1)
+        return dp[rem];
+    vector<ll> dig;
+    ll tmp = rem;
+    while (tmp)
     {
-        st.insert(cp % 10);
-        cp /= 10;
+        dig.push_back(tmp % 10);
+        tmp /= 10;
     }
-    ll ans = 1e9;
-
-    for (auto i : st)
+    ll ans = LLONG_MAX;
+    for (auto d : dig)
     {
-        if (x >= i && i != 0)
-            ans = min(ans, 1 + rec(x - i));
+        if (rem - d >= 0 && d != 0)
+            ans = min(ans, 1 + rec(rem - d));
     }
-
-    return dp[x] = ans;
+    return dp[rem] = ans;
 }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    cin >> n;
-    dp.resize(n + 1, -1);
-    cout << rec(n) << endl;
+    memset(dp, -1, sizeof(dp));
+    cin >> N;
+    cout << rec(N);
     return 0;
 }

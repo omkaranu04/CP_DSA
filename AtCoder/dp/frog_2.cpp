@@ -1,35 +1,36 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll n, k;
-vector<ll> h;
-vector<ll> dp;
-int rec(int level)
+#define endl "\n"
+const ll MAXN = 100010;
+ll K;
+ll dp[MAXN], h[MAXN];
+ll rec(ll i)
 {
-    if (level == n - 1)
+    // base case
+    if (i == 1)
         return 0;
-    if (dp[level] != -1)
-        return dp[level];
-
-    ll ans = INT_MAX;
-    for (int i = 1; i <= k && level + i < n; i++)
-    {
-        ans = min(ans, rec(level + i) + abs(h[level] - h[level + i]));
-    }
-    return dp[level] = ans;
+    // dp check and return
+    if (dp[i] != -1)
+        return dp[i];
+    // transitions
+    ll ans = LLONG_MAX;
+    for (ll k = 1; k <= K; k++)
+        if (i - k >= 1)
+            ans = min(ans, rec(i - k) + llabs(h[i] - h[i - k]));
+    // return
+    return dp[i] = ans;
 }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    cin >> n >> k;
-    h.resize(n);
-    for (ll i = 0; i < n; i++)
-    {
+    memset(dp, -1, sizeof(dp));
+    ll N;
+    cin >> N >> K;
+    for (ll i = 1; i <= N; i++)
         cin >> h[i];
-    }
-    dp.resize(n + 2, -1);
-    cout << rec(0) << endl;
+    cout << rec(N);
     return 0;
 }

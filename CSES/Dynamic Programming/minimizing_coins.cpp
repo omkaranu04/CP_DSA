@@ -1,52 +1,36 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll n, x;
-vector<ll> c;
-vector<ll> dp;
-vector<bool> vis;
-ll rec(int amt)
+#define endl "\n"
+const ll MAXN = 110, MAXX = 1e6 + 10;
+ll N, X;
+ll c[MAXN], dp[MAXX];
+ll rec(ll rem)
 {
-    if (amt == 0)
+    // base case
+    if (rem == 0)
         return 0;
-    if (amt < 0)
-        return -1;
-
-    if (vis[amt])
-        return dp[amt];
-
-    ll ans = 1e9;
-    for (int i = 0; i < n; i++)
-    {
-        if (amt - c[i] >= 0)
-        {
-            ll temp = rec(amt - c[i]);
-            if (temp != -1)
-            {
-                ans = min(ans, temp + 1);
-            }
-        }
-    }
-
-    vis[amt] = true;
-    (ans == 1e9) ? dp[amt] = -1 : dp[amt] = ans;
-    return dp[amt];
+    // dp check and return
+    if (dp[rem] != -1)
+        return dp[rem];
+    // transitions
+    ll ans = LLONG_MAX;
+    for (ll i = 1; i <= N; i++)
+        if (rem - c[i] >= 0)
+            if (rec(rem - c[i]) != LLONG_MAX)
+                ans = min(ans, 1 + rec(rem - c[i]));
+    // return
+    return dp[rem] = ans;
 }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    cin >> n >> x;
-    c.resize(n);
-    dp.resize(x + 1, -1);
-    vis.resize(x + 1, false);
-    for (int i = 0; i < n; i++)
-    {
+    memset(dp, -1, sizeof(dp));
+    cin >> N >> X;
+    for (ll i = 1; i <= N; i++)
         cin >> c[i];
-    }
-    ll ans = rec(x);
-    // cout << ((ans == 1e9) ? -1 : ans) << endl;
-    cout << ans << endl;
+    cout << (rec(X) == LLONG_MAX ? -1 : rec(X));
     return 0;
 }

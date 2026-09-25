@@ -1,36 +1,31 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-const ll mod = 1e9 + 7;
-ll n, x;
-vector<ll> c, dp;
-ll rec(ll rem_amt)
+#define endl "\n"
+const ll MOD = 1e9 + 7;
+const ll MAXN = 110, MAXX = 1e6 + 10;
+ll N, c[MAXN], dp[MAXX], X;
+ll rec(ll rem)
 {
-    if (rem_amt == 0)
+    if (rem == 0)
         return 1;
-
-    if (dp[rem_amt] != -1)
-        return dp[rem_amt];
-
+    if (dp[rem] != -1)
+        return dp[rem];
     ll ans = 0;
-    for (ll i = 0; i < n; i++)
-    {
-        if (rem_amt - c[i] >= 0)
-            ans = (ans + rec(rem_amt - c[i])) % mod;
-    }
-
-    return dp[rem_amt] = ans;
+    for (ll i = 1; i <= N; i++)
+        if (rem - c[i] >= 0)
+            ans = (ans + rec(rem - c[i])) % MOD;
+    return dp[rem] = ans;
 }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    cin >> n >> x;
-    c.resize(n);
-    dp.resize(x + 1, -1);
-    for (ll i = 0; i < n; i++)
+    memset(dp, -1, sizeof(dp));
+    cin >> N >> X;
+    for (ll i = 1; i <= N; i++)
         cin >> c[i];
-    cout << rec(x) << endl;
+    cout << rec(X);
     return 0;
 }

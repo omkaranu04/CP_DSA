@@ -2,57 +2,51 @@
 using namespace std;
 #define ll long long int
 #define endl "\n"
-const ll mod = 1e9 + 7;
-ll D, len;
-string K;
+const ll MOD = 1e9 + 7;
+const ll MAXN = 10010, MAXD = 110;
+ll D, N;
 string s1, s2;
-ll dp[10001][2][2][110];
-ll rec(ll level, ll tlo, ll thi, ll num)
+ll dp[MAXN][MAXD][3][3];
+ll rec(ll i, ll rem, ll tl, ll tr)
 {
-    if (level == len)
-    {
-        if (num == 0)
-            return 1;
-        return 0;
-    }
-    if (dp[level][tlo][thi][num] != -1)
-        return dp[level][tlo][thi][num];
-
+    // base case
+    if (i == N)
+        return (rem == 0) ? 1 : 0;
+    // dp check and return
+    if (dp[i][rem][tl][tr] != -1)
+        return dp[i][rem][tl][tr];
+    // transition
     ll l = 0, r = 9;
-    if (tlo == 1)
-        l = (s1[level] - '0');
-    if (thi == 1)
-        r = (s2[level] - '0');
-
+    if (tl)
+        l = (s1[i] - '0');
+    if (tr)
+        r = (s2[i] - '0');
     ll ans = 0;
-    for (ll i = l; i <= r; i++)
+    for (ll d = l; d <= r; d++)
     {
-        ll ntlo = tlo, nthi = thi;
-        if (tlo == 1 && i > s1[level] - '0')
-            ntlo = 0;
-        if (thi == 1 && i < s2[level] - '0')
-            nthi = 0;
-
-        ans += rec(level + 1, ntlo, nthi, (num + i) % D);
-        ans %= mod;
+        ll ntl = tl, ntr = tr;
+        if (tl == 1 && d > (s1[i] - '0'))
+            ntl = 0;
+        if (tr == 1 && d < (s2[i] - '0'))
+            ntr = 0;
+        ans = (ans + rec(i + 1, (rem + d) % D, ntl, ntr)) % MOD;
     }
-
-    return dp[level][tlo][thi][num] = ans;
+    // return
+    return dp[i][rem][tl][tr] = ans;
 }
 int main(int argc, char const *argv[])
 {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     cout.tie(NULL);
-    cin >> K;
-    cin >> D;
-    s1 = "1";
-    s2 = K;
-    s1 = string(s2.length() - s1.length(), '0') + s1;
-    len = s1.length();
-    // cout << s1 << " " << s2 << " " << len << endl;
-
     memset(dp, -1, sizeof(dp));
-    cout << rec(0, 1, 1, 0) << endl;
+    cin >> s2;
+    cin >> D;
+    for (ll i = 0; i < s2.length() - 1; i++)
+        s1.push_back('0');
+    s1 += '1';
+    N = s1.length();
+    // cout << s1 << "\n" << s2 << endl;
+    cout << rec(0, 0, 1, 1);
     return 0;
 }

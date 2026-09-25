@@ -1,33 +1,40 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long int
-ll n, m;
-vector<vector<ll>> g;
-vector<ll> dp;
-ll dfs(ll u)
+#define endl "\n"
+const ll MAXN = 100010;
+ll N, M;
+vector<vector<ll>> g(MAXN);
+ll dp[MAXN];
+ll rec(ll u)
 {
+    // base case
+    // dp check and return
     if (dp[u] != -1)
         return dp[u];
+    // transitions
     ll ans = 0;
     for (auto v : g[u])
-    {
-        ans = max(ans, 1 + dfs(v));
-    }
+        ans = max(ans, 1 + rec(v));
+    // return
     return dp[u] = ans;
 }
-int main()
+int main(int argc, char const *argv[])
 {
-    cin >> n >> m;
-    g.resize(n + 1);
-    dp.resize(n + 1, -1);
-    for (ll i = 0; i < m; i++)
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+    memset(dp, -1, sizeof(dp));
+    cin >> N >> M;
+    for (ll i = 1; i <= M; i++)
     {
-        ll u, v;
-        cin >> u >> v;
-        g[u].push_back(v);
+        ll x, y;
+        cin >> x >> y;
+        g[x].push_back(y);
     }
     ll ans = 0;
-    for (ll i = 1; i <= n; i++)
-        ans = max(ans, dfs(i));
-    cout << ans << endl;
+    for (ll i = 1; i <= N; i++)
+        ans = max(ans, rec(i));
+    cout << ans;
+    return 0;
 }
